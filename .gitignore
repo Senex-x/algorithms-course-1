@@ -1,5 +1,6 @@
 *.user
-.vsxproj
+*.vsxproj
+*.filters
 .vs
 */Debug
 /Debug
