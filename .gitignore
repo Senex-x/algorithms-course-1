@@ -2,6 +2,6 @@
 *.vcxproj
 *.filters
 .vs
-.sln
+*.sln
 */Debug
 /Debug
