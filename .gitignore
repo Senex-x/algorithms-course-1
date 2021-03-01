@@ -1,7 +1,3 @@
-*.user
-*.vcxproj
-*.filters
-.vs
-*.sln
-*/Debug
 /Debug
+/MainProject
+/.vs
