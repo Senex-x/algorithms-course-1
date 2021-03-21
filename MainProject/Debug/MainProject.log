@@ -1,4 +1,5 @@
 ﻿  Source.cpp
-C:\Projects\Cpp\MainProject\MainProject\Source.cpp(8,12): error C2143:  синтаксическая ошибка: отсутствие ";" перед "*"
-C:\Projects\Cpp\MainProject\MainProject\Source.cpp(8,12): error C4430:  отсутствует спецификатор типа - предполагается int. Примечание. C++ не поддерживает int по умолчанию
-C:\Projects\Cpp\MainProject\MainProject\Source.cpp(8,37): error C2238:  непредвиденные лексемы перед ";"
+d:\projects\cpp\polyakovv_11005_cpp\mainproject\source.cpp(91): warning C4018: <: несоответствие типов со знаком и без знака
+d:\projects\cpp\polyakovv_11005_cpp\mainproject\source.cpp(130): warning C4018: <: несоответствие типов со знаком и без знака
+d:\projects\cpp\polyakovv_11005_cpp\mainproject\source.cpp(139): warning C4018: <: несоответствие типов со знаком и без знака
+  MainProject.vcxproj -> D:\Projects\Cpp\PolyakovV_11005_Cpp\MainProject\Debug\MainProject.exe
