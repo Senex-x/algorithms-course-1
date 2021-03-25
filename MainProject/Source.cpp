@@ -3,142 +3,130 @@
 #include <vector>
 
 using namespace std;
- 
-struct SortedTree {
-	vector<int> tree;
 
-	int getSize() {
-		return tree.size();
-	}
-
-	void add(int val) {
-		tree.push_back(val);
-		raiser(tree.size() - 1);
-	}
-
-	int extractMax() {
-		int res = tree[0];
-		tree[0] = tree[getSize() - 1];
-		tree.resize(tree.size() - 1);
-		descender(0);
-		return res;
-	}
-
-	void raiser(int i) {
-		while (i > 0 && tree[i] > tree[getParentIndOf(i)]) {
-			swap(tree[i], tree[getParentIndOf(i)]);
-			i = getParentIndOf(i);
-		}
-	}
-
-	void swapNodes(int first, int second) {
-		return swap(tree[first], tree[second]);
-	}
-
-	// WTF
-	int descender(int i) {
-		if (i == -1 || tree.size() == 0) {
-			return (-1);
-		}
-
-		int leftChild;
-		int rightChild;
-		int parent = tree[i];
-		int maxNodeInd = i, maxNode = parent;
-
-		if (getLeftChildIndOf(i) >= getSize()) return -1;
-		leftChild = tree[getLeftChildIndOf(i)];
-		if (getRightChildIndOf(i) >= getSize())
-			rightChild = INT_MIN;
-		else
-			rightChild = tree[getRightChildIndOf(i)];
-
-		if (parent < leftChild) {
-			maxNode = leftChild;
-			maxNodeInd = getLeftChildIndOf(i);
-		}
-		if (maxNode < rightChild) {
-			maxNode = rightChild;
-			maxNodeInd = getRightChildIndOf(i);
-		}
-
-		if (parent == maxNode) return -1;
-
-		swap(tree[i], tree[maxNodeInd]);
-
-		descender(maxNodeInd);
-
-		return -1;
-	}
-
-	int getMax() {
-		return tree[0];
-	}
-
-	int getParentIndOf(int i) {
-		return (i-1)/2;
-	}
-
-	int getLeftChildIndOf(int i) {
-		return 2* i + 1;
-	}
-
-	int getRightChildIndOf(int i) {
-		return 2 * i + 2;
-	}
-
-	void display() {
-		for (int i = 0; i < tree.size(); i++) {
-			cout << tree[i] << " ";
-		}
-		cout << endl;
-	}
+struct Node {
+	int key;     // ключ
+	Node* parent;  // указатель на родительский узел
+	Node* child;  // указатель на один из дочерних узлов
+	Node* left;  // указатель на левый узел того же предка
+	Node* right;  // указатель на правый узел того же предка
+	int degree;  // степень вершины
+	bool mark;// был ли удален в процессе изменения ключа ребенок этой вершины)
 };
 
-struct MaxHeap {
-	SortedTree* tree = new SortedTree();
-	void insert(int val) {
-		tree->add(val);
+struct FibonacciHeap {
+	int size = 0; // текущее количество узлов
+	Node* min = NULL; // указатель на корень дерева с минимальным ключом 
+
+	void insert(int x) {
+		Node* newNode = new Node();                // создаем новый узел 
+		newNode->key = x;          // инициализируем ключ нового узла
+		if (size == 0) {             // если куче нет элементов, то только что добавленный минимальный
+			min = newNode;
+			min->left = newNode;
+			min->right = newNode;
+		}
+		else {                     // иначе аккуратно меняем указатели в списке, чтобы не перепутать указатели
+			Node* prevRight = min->right;
+			min->right = newNode;
+			newNode->left = min;
+			newNode->right = prevRight;
+			prevRight->left = newNode;
+		}
+		if (newNode->key < min->key) {
+			min = newNode;
+		}// меняем указатель на минимум, если надо
+				newNode->parent;
+				size++;                  // не забываем увеличить переменную size 
+			
+		
 	}
 
-	int getMax() {
-		return tree->getMax();
+	int getMin() {
+		return min->key;
 	}
 
-	int extractMax() {
-		return tree->extractMax();
+	void unionLists(Node* first, Node* second) {
+		Node* L = first->left;             // аккуратно меняем указатели местами указатели
+		Node* R = second->right;
+		second->right = first;
+		first->left = second;
+		L->right = R;
+		R->left = L;
+	}
+
+	void merge(FibonacciHeap* that) {
+		if (that->size == 0)            // если вторая куча пуста, нечего добавлять
+			return;
+		if (size = 0) {                    // если наша куча пуста, то результатом будет вторая куча
+			min = that->min;
+			size = that->size;
+		}
+		else {
+			unionLists(min, that->min); // объединяем два корневых списка
+			size += that->size;
+			if (min || (that->min and that->min < min)) { // если минимум кучи изменился, то надо обновить указатель
+				min = that->min;
+			}
+		}
+	}
+
+	void consolidate() {
+		Node* A[1024];
+		A[min->degree] = min;               // создаем массив и инициализируем его min
+		Node* current = min->right;
+		while (A[current->degree] != current) {   // пока элементы массива меняются
+			if (A[current->degree]) {     // если ячейка пустая, то положим в нее текущий элемент
+				A[current->degree] = current;
+				current = current->right;
+			}
+			else {                  // иначе подвесим к меньшему из текущего корня и того, который лежит в ячейке другой
+				Node* conflict = A[current->degree];
+				Node* addTo,* adding;
+
+				if (conflict->key < current->key) {
+					addTo = conflict;
+					adding = current;
+				}
+				else {
+					addTo = current;
+					adding = conflict;
+				}
+				unionLists(addTo->child, adding);
+				adding->parent = addTo;
+				addTo->degree++;
+				current = addTo;
+			}
+			if (min->key > current->key)      // обновляем минимум, если нужно
+				min = current;
+		}
+	}
+
+	int deleteMin() {
+		Node* prevMin = min;
+		unionLists(min, min->child);   // список детей min объединяем с корневым
+		Node* L = min->left;            // аккуратно удаляем min из списка
+		Node* R = min->right;
+		L->right = R;
+		R->left = L;
+		if (prevMin->right == prevMin)  // отдельно рассмотрим случай с одним элементом
+			return min->key;
+
+		min = min->right;              // пока что перекинем указатель min на правого сына, а далее consolidate() скорректирует min в процессе выполнения
+		consolidate();
+		size--;
+		return prevMin->key;
 	}
 };
-
-int* heapSort(int * array, int size) {
-	MaxHeap * heap = new MaxHeap();
-	for (int i = 0; i < size; i++) {
-		heap->insert(array[i]);
-	}
-	int* res = new int[size];
-	for (int i = 0; i < size; i++) {
-		res[i] = heap->extractMax();
-	}
-	return res;
-}
-
 
 int main() {
-	SortedTree* tree = new SortedTree();
-	int a[] = {7, 2, 5, 1, 8, 9, 4 };
-
-	for (int i = 0; i < size(a); i++) {
-		tree->add(a[i]);
+	FibonacciHeap* heap = new FibonacciHeap();
+	int array[] = { 23, 54, 12, 54, 7, 3, 234, 6, 34, 90 };
+	for (int i = 0; i < 10; i++) {
+		heap->insert(array[i]);
 	}
-	tree->display();
-
-	cout << tree->extractMax() << endl;
-	tree->display();
-	
-	int* res = heapSort(a, size(a));
-	for (int i = 0; i < size(a); i++) {
-		cout << res[i] << " ";
-	}
+	cout << heap->getMin();
 
 	return 0;
 }
+
