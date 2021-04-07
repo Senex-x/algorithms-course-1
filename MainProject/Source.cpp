@@ -19,9 +19,9 @@ struct FibonacciHeap {
 	Node* min = NULL; // указатель на корень дерева с минимальным ключом 
 
 	void insert(int x) {
-		Node* newNode = new Node();                // создаем новый узел 
-		newNode->key = x;          // инициализируем ключ нового узла
-		if (size == 0) {             // если куче нет элементов, то только что добавленный минимальный
+		Node* newNode = new Node();                //  создаем новый узел 
+		newNode->key = x;          //   инициализируем ключ нового узла
+		if (size == 0) {             //   если куче нет элементов, то только что добавленный минимальный
 			min = newNode;
 			min->left = newNode;
 			min->right = newNode;
