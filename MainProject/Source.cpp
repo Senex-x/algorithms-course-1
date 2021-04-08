@@ -5,7 +5,7 @@
 using namespace std;
 
 struct Node {
-	int key;     // ключ
+	int key;      // ключ
 	Node* parent;  // указатель на родительский узел
 	Node* child;  // указатель на один из дочерних узлов
 	Node* left;  // указатель на левый узел того же предка
