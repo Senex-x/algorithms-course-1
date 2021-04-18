@@ -5,28 +5,28 @@
 using namespace std;
 
 struct Node {
-	int key;      // ключ
-	Node* parent;  // указатель на родительский узел
-	Node* child;  // указатель на один из дочерних узлов
-	Node* left;  // указатель на левый узел того же предка
-	Node* right;  // указатель на правый узел того же предка
-	int degree;  // степень вершины
-	bool mark;// был ли удален в процессе изменения ключа ребенок этой вершины)
+	int key;      
+	Node* parent;  
+	Node* child;  
+	Node* left;  
+	Node* right;  
+	int degree;  
+	bool mark; 
 };
 
 struct FibonacciHeap {
-	int size = 0; // текущее количество узлов
-	Node* min = NULL; // указатель на корень дерева с минимальным ключом 
-
+	int size = 0; 
+	Node* min = NULL; 
+	/*
 	void insert(int x) {
-		Node* newNode = new Node();               //  создаем новый узел 
-		newNode->key = x;          //   инициализируем ключ нового узла
-		if (size == 0) {             //   если куче нет элементов, то только что добавленный минимальный
+		Node* newNode = new Node();               
+		newNode->key = x;          
+		if (size == 0) {             
 			min = newNode;
 			min->left = newNode;
 			min->right = newNode;
 		}
-		else {                     // иначе аккуратно меняем указатели в списке, чтобы не перепутать указатели
+		else {          
 			Node* prevRight = min->right;
 			min->right = newNode;
 			newNode->left = min;
@@ -35,11 +35,31 @@ struct FibonacciHeap {
 		}
 		if (newNode->key < min->key) {
 			min = newNode;
-		}// меняем указатель на минимум, если надо
-				newNode->parent;
-				size++;                  // не забываем увеличить переменную size 
-			
-		
+		}
+		newNode->parent = 
+		size++;                 
+	}*/
+
+	void insert(int val)
+	{
+		Node* new_node = new Node();
+		new_node->key = val;
+		new_node->parent = NULL;
+		new_node->child = NULL;
+		new_node->left = new_node;
+		new_node->right = new_node;
+		if (min != NULL) {
+			(min->left)->right = new_node;
+			new_node->right = min;
+			new_node->left = min->left;
+			min->left = new_node;
+			if (new_node->key < min->key)
+				min = new_node;
+		}
+		else {
+			min = new_node;
+		}
+		size++;
 	}
 
 	int getMin() {
@@ -47,7 +67,7 @@ struct FibonacciHeap {
 	}
 
 	void unionLists(Node* first, Node* second) {
-		Node* L = first->left;             // аккуратно меняем указатели местами указатели
+		Node* L = first->left;             
 		Node* R = second->right;
 		second->right = first;
 		first->left = second;
@@ -56,16 +76,16 @@ struct FibonacciHeap {
 	}
 
 	void merge(FibonacciHeap* that) {
-		if (that->size == 0)            // если вторая куча пуста, нечего добавлять
+		if (that->size == 0)            
 			return;
-		if (size = 0) {                    // если наша куча пуста, то результатом будет вторая куча
+		if (size = 0) {                    
 			min = that->min;
 			size = that->size;
 		}
 		else {
-			unionLists(min, that->min); // объединяем два корневых списка
+			unionLists(min, that->min); 
 			size += that->size;
-			if (min || (that->min and that->min < min)) { // если минимум кучи изменился, то надо обновить указатель
+			if (min || (that->min and that->min < min)) { 
 				min = that->min;
 			}
 		}
@@ -73,16 +93,16 @@ struct FibonacciHeap {
 
 	void consolidate() {
 		Node* A[1024];
-		A[min->degree] = min;               // создаем массив и инициализируем его min
+		A[min->degree] = min;               
 		Node* current = min->right;
-		while (A[current->degree] != current) {   // пока элементы массива меняются
-			if (A[current->degree]) {     // если ячейка пустая, то положим в нее текущий элемент
+		while (A[current->degree] != current) {   
+			if (A[current->degree]) {     
 				A[current->degree] = current;
 				current = current->right;
 			}
-			else {                  // иначе подвесим к меньшему из текущего корня и того, который лежит в ячейке другой
+			else {                  
 				Node* conflict = A[current->degree];
-				Node* addTo,* adding;
+				Node* addTo, * adding;
 
 				if (conflict->key < current->key) {
 					addTo = conflict;
@@ -97,37 +117,58 @@ struct FibonacciHeap {
 				addTo->degree++;
 				current = addTo;
 			}
-			if (min->key > current->key)      // обновляем минимум, если нужно
+			if (min->key > current->key)      
 				min = current;
 		}
 	}
 
 	int deleteMin() {
 		Node* prevMin = min;
-		unionLists(min, min->child);   // список детей min объединяем с корневым
-		Node* L = min->left;            // аккуратно удаляем min из списка
+		unionLists(min, min->child);  
+		Node* L = min->left;           
 		Node* R = min->right;
 		L->right = R;
 		R->left = L;
-		if (prevMin->right == prevMin)  // отдельно рассмотрим случай с одним элементом
+		if (prevMin->right == prevMin)  
 			return min->key;
 
-		min = min->right;              // пока что перекинем указатель min на правого сына, а далее consolidate() скорректирует min в процессе выполнения
+		min = min->right;            
 		consolidate();
 		size--;
 		return prevMin->key;
+	}
+
+	void display(Node* min)
+	{
+		Node* ptr = min;
+		if (ptr == NULL)
+			cout << "The Heap is Empty" << endl;
+
+		else {
+			cout << "The root nodes of Heap are: " << endl;
+			do {
+				cout << ptr->key;
+				ptr = ptr->right;
+				if (ptr != min) {
+					cout << "-->";
+				}
+			} while (ptr != min && ptr->right != NULL);
+			cout << endl
+				<< "The heap has " << size << " nodes" << endl;
+		}
 	}
 };
 
 int main() {
 	FibonacciHeap* heap = new FibonacciHeap();
-	int array[] = { 23, 54, 12, 54, 7, 3, 234, 6, 34, 90 };
+	int array[] = { 23, 54, 12, 54, 7, 10, 234, 6, 34, 90 };
 	for (int i = 0; i < 10; i++) {
 		heap->insert(array[i]);
 	}
-	heap->deleteMin();
-	cout << heap->getMin();
-
+	heap->display(heap->min);
+	heap->insert(3);
+	heap->display(heap->min);
+	cout << heap->deleteMin();
+	heap->display(heap->min);
 	return 0;
 }
-
