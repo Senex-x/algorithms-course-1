@@ -1,174 +1,248 @@
-#include <iostream>
-#include <algorithm>
-#include <vector>
+#include<iostream>
+#include<fstream>
 
 using namespace std;
 
-struct Node {
-	int key;      
-	Node* parent;  
-	Node* child;  
-	Node* left;  
-	Node* right;  
-	int degree;  
-	bool mark; 
+struct node {
+	node* prev;
+	node* next;
+	node* child;
+	node* parent;
+	int key;
+	int degree;
+	bool marked;
 };
 
 struct FibonacciHeap {
-	int size = 0; 
-	Node* min = NULL; 
-	/*
-	void insert(int x) {
-		Node* newNode = new Node();               
-		newNode->key = x;          
-		if (size == 0) {             
-			min = newNode;
-			min->left = newNode;
-			min->right = newNode;
-		}
-		else {          
-			Node* prevRight = min->right;
-			min->right = newNode;
-			newNode->left = min;
-			newNode->right = prevRight;
-			prevRight->left = newNode;
-		}
-		if (newNode->key < min->key) {
-			min = newNode;
-		}
-		newNode->parent = 
-		size++;                 
-	}*/
+	int size = 0;
+	node* min = NULL;	
 
-	void insert(int val)
-	{
-		Node* new_node = new Node();
-		new_node->key = val;
-		new_node->parent = NULL;
-		new_node->child = NULL;
-		new_node->left = new_node;
-		new_node->right = new_node;
-		if (min != NULL) {
-			(min->left)->right = new_node;
-			new_node->right = min;
-			new_node->left = min->left;
-			min->left = new_node;
-			if (new_node->key < min->key)
-				min = new_node;
-		}
-		else {
-			min = new_node;
-		}
+	node* insert(int key) {
+		node* ret = _singleton(key);
+		min = mergeTop(min, ret);
 		size++;
+		return ret;
+	}
+
+	void merge(FibonacciHeap& other) {
+		min = mergeTop(min, other.min);
+		other.min = NULL;
 	}
 
 	int getMin() {
 		return min->key;
 	}
 
-	void unionLists(Node* first, Node* second) {
-		Node* L = first->left;             
-		Node* R = second->right;
-		second->right = first;
-		first->left = second;
-		L->right = R;
-		R->left = L;
-	}
-
-	void merge(FibonacciHeap* that) {
-		if (that->size == 0)            
-			return;
-		if (size = 0) {                    
-			min = that->min;
-			size = that->size;
-		}
-		else {
-			unionLists(min, that->min); 
-			size += that->size;
-			if (min || (that->min and that->min < min)) { 
-				min = that->min;
-			}
-		}
-	}
-
-	void consolidate() {
-		Node* A[1024];
-		A[min->degree] = min;               
-		Node* current = min->right;
-		while (A[current->degree] != current) {   
-			if (A[current->degree]) {     
-				A[current->degree] = current;
-				current = current->right;
-			}
-			else {                  
-				Node* conflict = A[current->degree];
-				Node* addTo, * adding;
-
-				if (conflict->key < current->key) {
-					addTo = conflict;
-					adding = current;
-				}
-				else {
-					addTo = current;
-					adding = conflict;
-				}
-				unionLists(addTo->child, adding);
-				adding->parent = addTo;
-				addTo->degree++;
-				current = addTo;
-			}
-			if (min->key > current->key)      
-				min = current;
-		}
-	}
-
-	int deleteMin() {
-		Node* prevMin = min;
-		unionLists(min, min->child);  
-		Node* L = min->left;           
-		Node* R = min->right;
-		L->right = R;
-		R->left = L;
-		if (prevMin->right == prevMin)  
-			return min->key;
-
-		min = min->right;            
-		consolidate();
+	int removeMin() {
+		node* old = min;
+		min = _removeMinimum(min);
+		int ret = old->key;
+		delete old;
 		size--;
-		return prevMin->key;
+		return ret;
 	}
 
-	void display(Node* min)
-	{
-		Node* ptr = min;
-		if (ptr == NULL)
-			cout << "The Heap is Empty" << endl;
-
-		else {
-			cout << "The root nodes of Heap are: " << endl;
+	void display(node* min) {
+		node* ptr = min;
+		if (ptr != NULL) {
 			do {
 				cout << ptr->key;
-				ptr = ptr->right;
+				ptr = ptr->next;
 				if (ptr != min) {
-					cout << "-->";
+					cout << " ";
 				}
-			} while (ptr != min && ptr->right != NULL);
-			cout << endl
-				<< "The heap has " << size << " nodes" << endl;
+			} while (ptr != min && ptr->prev != NULL);
+			cout << endl << size << endl;
 		}
+	}
+
+	node* _singleton(int key) {
+		node* n = new node();
+		n->key = key;
+		n->prev = n->next = n;
+		n->degree = 0;
+		n->marked = false;
+		n->child = NULL;
+		n->parent = NULL;
+		return n;
+	}
+
+	node* mergeTop(node* a, node* b) {
+		if (a == NULL)return b;
+		if (b == NULL)return a;
+		if (a->key > b->key) {
+			node* temp = a;
+			a = b;
+			b = temp;
+		}
+		node* an = a->next;
+		node* bp = b->prev;
+		a->next = b;
+		b->prev = a;
+		an->prev = bp;
+		bp->next = an;
+		return a;
+	}
+
+	void _deleteAll(node* n) {
+		if (n != NULL) {
+			node* c = n;
+			do {
+				node* d = c;
+				c = c->next;
+				_deleteAll(d->child);
+				delete d;
+			} while (c != n);
+		}
+	}
+
+	void _addChild(node* parent, node* child) {
+		child->prev = child->next = child;
+		child->parent = parent;
+		parent->degree++;
+		parent->child = mergeTop(parent->child, child);
+	}
+
+	void _unMarkAndUnParentAll(node* n) {
+		if (n == NULL)return;
+		node* c = n;
+		do {
+			c->marked = false;
+			c->parent = NULL;
+			c = c->next;
+		} while (c != n);
+	}
+
+	node* _removeMinimum(node* n) {
+		_unMarkAndUnParentAll(n->child);
+		if (n->next == n) {
+			n = n->child;
+		}
+		else {
+			n->next->prev = n->prev;
+			n->prev->next = n->next;
+			n = mergeTop(n->next, n->child);
+		}
+		if (n == NULL)return n;
+		node* trees[64] = { NULL };
+
+		while (true) {
+			if (trees[n->degree] != NULL) {
+				node* t = trees[n->degree];
+				if (t == n)break;
+				trees[n->degree] = NULL;
+				if (n->key < t->key) {
+					t->prev->next = t->next;
+					t->next->prev = t->prev;
+					_addChild(n, t);
+				}
+				else {
+					t->prev->next = t->next;
+					t->next->prev = t->prev;
+					if (n->next == n) {
+						t->next = t->prev = t;
+						_addChild(t, n);
+						n = t;
+					}
+					else {
+						n->prev->next = t;
+						n->next->prev = t;
+						t->next = n->next;
+						t->prev = n->prev;
+						_addChild(t, n);
+						n = t;
+					}
+				}
+				continue;
+			}
+			else {
+				trees[n->degree] = n;
+			}
+			n = n->next;
+		}
+		node* min = n;
+		node* start = n;
+		do {
+			if (n->key < min->key)min = n;
+			n = n->next;
+		} while (n != start);
+		return min;
+	}
+
+	node* cut(node* min, node* n) {
+		if (n->next == n) {
+			n->parent->child = NULL;
+		}
+		else {
+			n->next->prev = n->prev;
+			n->prev->next = n->next;
+			n->parent->child = n->next;
+		}
+		n->next = n->prev = n;
+		n->marked = false;
+		return mergeTop(min, n);
+	}
+
+	node* decreaseKey(node* min, node* n, int key) {
+		if (n->key < key)return min;
+		n->key = key;
+		if (n->parent) {
+			if (n->key < n->parent->key) {
+				min = cut(min, n);
+				node* parent = n->parent;
+				n->parent = NULL;
+				while (parent != NULL && parent->marked) {
+					min = cut(min, parent);
+					n = parent;
+					parent = n->parent;
+					n->parent = NULL;
+				}
+				if (parent != NULL && parent->parent != NULL)parent->marked = true;
+			}
+		}
+		else {
+			if (n->key < min->key) {
+				min = n;
+			}
+		}
+		return min;
 	}
 };
 
+#include<string>
+#include<cstring>
+#include<sstream>
+
+
 int main() {
-	FibonacciHeap* heap = new FibonacciHeap();
-	int array[] = { 23, 54, 12, 54, 7, 10, 234, 6, 34, 90 };
-	for (int i = 0; i < 10; i++) {
-		heap->insert(array[i]);
+	FibonacciHeap* h = new FibonacciHeap();
+
+	ifstream file("D:\\Projects\\Cpp\\tests\\seq-length-20000000.txt");
+	string inp;
+	int size = 20000000;
+	int div = size / 100;
+
+	int s;
+	double count = 0;
+	file >> s;
+	double startTime = clock();
+	while (!file.eof()) {
+		h->insert(s);
+		file >> s;
 	}
-	heap->display(heap->min);
-	heap->insert(3);
-	heap->display(heap->min);
-	cout << heap->deleteMin();
-	heap->display(heap->min);
+	system("cls");
+	cout << "r" << endl;
+	double addTime = clock();
+	h->removeMin();
+	double decTime = clock();
+	h->decreaseKey(h->min, h->min->child, 0);
+	double endTime = clock();
+
+	cout << addTime << endl;
+	cout << decTime - addTime << endl;
+	double deleteTime = endTime - decTime;
+	cout << deleteTime << endl;
+
 	return 0;
+
 }
