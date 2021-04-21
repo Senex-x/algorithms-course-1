@@ -57,7 +57,7 @@ struct FibonacciHeap {
 	}
 
 	node* _singleton(int key) {
-		node* n = new node();
+		node* n = new node;
 		n->key = key;
 		n->prev = n->next = n;
 		n->degree = 0;
@@ -217,32 +217,34 @@ struct FibonacciHeap {
 int main() {
 	FibonacciHeap* h = new FibonacciHeap();
 
-	ifstream file("D:\\Projects\\Cpp\\tests\\seq-length-20000000.txt");
-	string inp;
-	int size = 20000000;
+	
+
+	int size = 30000000;
 	int div = size / 100;
 
-	int s;
-	double count = 0;
-	file >> s;
-	double startTime = clock();
-	while (!file.eof()) {
-		h->insert(s);
+	for (int i = 12000000; i < 20000000; i += 2000000) {
+		string path = "D:\\Projects\\Cpp\\tests\\seq-length-" + to_string(i) + ".txt";
+		ifstream file(path);
+		int s;
+		
 		file >> s;
+		double startTime = clock();
+		while (!file.eof()) {
+			h->insert(s);
+			file >> s;
+		}
+		double addTime = clock();
+		cout << "add " << addTime << " ";
+
+		h->removeMin();
+		double decTime = clock();
+		cout << "del " << decTime - addTime << " ";
+
+		h->decreaseKey(h->min, h->min->child, 0);
+		double endTime = clock();
+		cout << "dec " << endTime - decTime << endl;
+
+		file.close();
 	}
-	system("cls");
-	cout << "r" << endl;
-	double addTime = clock();
-	h->removeMin();
-	double decTime = clock();
-	h->decreaseKey(h->min, h->min->child, 0);
-	double endTime = clock();
-
-	cout << addTime << endl;
-	cout << decTime - addTime << endl;
-	double deleteTime = endTime - decTime;
-	cout << deleteTime << endl;
-
 	return 0;
-
 }
