@@ -6,7 +6,7 @@ using namespace std;
 vector<int> list;
 
 int binarySearch(int l, int r, int key) {
-	int mid = (l + r) / 2;
+	int mid = (l + r + 1) / 2;
 
 	if (list[mid] == key) {
 		return mid;

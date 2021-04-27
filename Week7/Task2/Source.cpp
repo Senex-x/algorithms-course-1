@@ -6,7 +6,7 @@ using namespace std;
 vector< vector<int> > matrix;
 
 int binarySearch(int ind, int l, int r, int key) {
-	int mid = (l + r + 1) / 2;
+	int mid = (l + r) / 2;
 
 	if (matrix[ind][mid] == key) {
 		return mid;
@@ -36,14 +36,14 @@ int main() {
 
 	for (int i = 0; i < n; i++) {
 		if (matrix[i][matrix[i].size() - 1] >= key) {
-			int res = binarySearch(i, 0, matrix.size(), key);
+			int res = binarySearch(i, 0, matrix[i].size(), key);
 			if (res == -1) {
 				cout << "Key not present";
 			}
 			else {
 				cout << "key: " << key
-					<< " i: " << i 
-					<< " j: " << res 
+					<< " i: " << i
+					<< " j: " << res
 					<< endl;
 			}
 			break;
@@ -53,8 +53,8 @@ int main() {
 
 
 /*
-78 3 5
+98 2 5
 1 3 4 6 9
-10 23 26 27 29 
+10 23 26 27 29
 55 67 78 98 100
 */
