@@ -1,6 +1,8 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include<sstream>
+#include<fstream>
 
 using namespace std;
 
@@ -21,32 +23,41 @@ bool compare(pair<int, int> p1, pair<int, int> p2) {
 }
 
 
+string path = "D:\\Projects\\Cpp\\tests\\seq.txt";
+
 int main() {
 	int n, counter = 0;
-	cin >> n;
 
-	vector<vector<int>> matrix(n, vector<int>(n));
-	vector<bool> mark(n, false);
-	vector<pair<int, int>> result(n);
+	ifstream file(path);
+	int s;
 
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < n; j++) {
-			cin >> matrix[i][j];
+	while (!file.eof()) {
+		file >> s;
+		n = s;
+		cout << "Data set size: " << n << endl;
+		vector<vector<int>> matrix(n, vector<int>(n));
+		vector<bool> mark(n, false);
+		vector<pair<int, int>> result(n);
+
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				file >> matrix[i][j];
+			}
 		}
-	}
 
-	for (int i = 0; i < mark.size(); i++) {
-		if (!mark[i]) { // not marked yet
-			dfs(i, matrix, mark, counter, result);
+		for (int i = 0; i < mark.size(); i++) {
+			if (!mark[i]) { // not marked yet
+				dfs(i, matrix, mark, counter, result);
+			}
 		}
-	}
 
-	sort(result.begin(), result.end(), compare);
+		sort(result.begin(), result.end(), compare);
 
-	for (int i = 0; i < result.size(); i++) {
-		cout << result[i].first << " ";
+		for (int i = 0; i < result.size(); i++) {
+			cout << result[i].first << " ";
+		}
+		cout << endl;
 	}
-	cout << endl;
 }
 
 /*
